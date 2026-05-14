@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Offer 选择澄清题</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20242c;
+      --muted: #6d7480;
+      --line: #e6e1d8;
+      --paper: #fbfaf7;
+      --panel: #ffffff;
+      --a: #2d6cdf;
+      --a-soft: #e9f0ff;
+      --b: #c2533c;
+      --b-soft: #fff0eb;
+      --accent: #2f7d67;
+      --accent-soft: #e8f4ef;
+      --shadow: 0 24px 70px rgba(41, 37, 31, .13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 18%, rgba(47, 125, 103, .13), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(194, 83, 60, .12), transparent 30%),
+        linear-gradient(135deg, #f8f4ed 0%, #f7fbf8 48%, #f6f1ec 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 40px;
+    }
+
+    .hero {
+      min-height: 220px;
+      display: flex;
+      align-items: end;
+    }
+
+    .hero h1 {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(36px, 6vw, 68px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 18px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .board {
+      margin-top: 30px;
+    }
+
+    .quiz-card,
+    .result-card {
+      background: rgba(255, 255, 255, .86);
+      border: 1px solid rgba(230, 225, 216, .95);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 26px;
+    }
+
+    .dot {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(32, 36, 44, .15);
+      transition: background .2s ease;
+    }
+
+    .dot.done {
+      background: var(--accent);
+    }
+
+    .quiz-card {
+      min-height: 486px;
+      padding: clamp(20px, 4vw, 34px);
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 26px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .question-number {
+      color: var(--accent);
+    }
+
+    .question {
+      margin: 0 0 28px;
+      font-size: clamp(24px, 3.8vw, 42px);
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: -8px 0 26px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .choice {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 13px;
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .choice:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(41, 37, 31, .11);
+    }
+
+    .choice.selected {
+      border-color: currentColor;
+      box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 14%, transparent);
+    }
+
+    .choice.a {
+      color: var(--a);
+    }
+
+    .choice.b {
+      color: var(--b);
+    }
+
+    .choice.a.selected {
+      background: var(--a-soft);
+    }
+
+    .choice.b.selected {
+      background: var(--b-soft);
+    }
+
+    .choice-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: currentColor;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .choice-copy strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .choice-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .nav button,
+    .reset {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 16px;
+      color: #fff;
+      background: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .nav button:hover,
+    .reset:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav button:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ghost {
+      color: var(--ink) !important;
+      background: #efeae1 !important;
+    }
+
+    .result-card {
+      display: none;
+      margin-top: 22px;
+      padding: clamp(20px, 4vw, 32px);
+    }
+
+    .result-card.show {
+      display: block;
+    }
+
+    .result-grid {
+      display: grid;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .result-title {
+      margin: 10px 0 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .tendency {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .offer-card {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 18px;
+      min-height: 220px;
+      padding: clamp(18px, 3vw, 26px);
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .offer-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -28px -46px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .08;
+    }
+
+    .offer-card.a {
+      color: var(--a);
+    }
+
+    .offer-card.b {
+      color: var(--b);
+    }
+
+    .offer-card.winner {
+      border-color: currentColor;
+      box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 12%, transparent);
+    }
+
+    .offer-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .offer-label {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: currentColor;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .offer-name {
+      flex: 1;
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .offer-votes {
+      color: currentColor;
+      font-size: clamp(54px, 10vw, 92px);
+      font-weight: 900;
+      line-height: .9;
+      letter-spacing: 0;
+    }
+
+    .offer-caption {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .split {
+      display: grid;
+      gap: 10px;
+    }
+
+    .split-bar {
+      display: flex;
+      height: 22px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #f0ece5;
+    }
+
+    .split-a,
+    .split-b {
+      min-width: 0;
+      transition: width .25s ease;
+    }
+
+    .split-a {
+      background: var(--a);
+    }
+
+    .split-b {
+      background: var(--b);
+    }
+
+    .split-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .review {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(34px, 1fr));
+      gap: 8px;
+    }
+
+    .review-dot {
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .review-dot.a {
+      background: var(--a);
+    }
+
+    .review-dot.b {
+      background: var(--b);
+    }
+
+    .closing {
+      margin: 22px 0 0;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: #245f50;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 860px) {
+      .quiz-card {
+        min-height: auto;
+      }
+
+      .tendency {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 22px, 1120px);
+        padding-top: 20px;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .choice {
+        min-height: 112px;
+      }
+
+      .review {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero" aria-labelledby="title">
+      <div>
+        <h1 id="title">两个 Offer，听见自己的选择</h1>
+        <p>不用先证明哪一个更“正确”。把公司名气、薪资光环和外界评价暂时放下，逐题选择更贴近内心的 A 或 B。</p>
+      </div>
+    </section>
+
+    <section class="board">
+      <section>
+        <article class="quiz-card" aria-live="polite">
+          <div class="question-meta">
+            <span id="questionNumber" class="question-number">问题 1</span>
+            <span id="questionTheme">具体日常</span>
+          </div>
+          <h2 id="questionText" class="question"></h2>
+          <p id="questionHint" class="hint"></p>
+          <div class="choices">
+            <button id="choiceA" class="choice a" type="button">
+              <span class="choice-mark">A</span>
+              <span class="choice-copy">
+                <strong id="choiceATitle">Offer A</strong>
+                <span>这一题，我更偏向 A。</span>
+              </span>
+            </button>
+            <button id="choiceB" class="choice b" type="button">
+              <span class="choice-mark">B</span>
+              <span class="choice-copy">
+                <strong id="choiceBTitle">Offer B</strong>
+                <span>这一题，我更偏向 B。</span>
+              </span>
+            </button>
+          </div>
+          <nav class="nav" aria-label="题目导航">
+            <button id="prevBtn" class="ghost" type="button">上一题</button>
+            <button id="nextBtn" type="button">下一题</button>
+          </nav>
+          <div id="steps" class="steps" aria-hidden="true"></div>
+        </article>
+
+        <article id="result" class="result-card" aria-live="polite">
+          <div class="result-grid">
+            <div class="result-head">
+              <div>
+                <span class="pill">可视化倾向</span>
+                <h2 id="resultTitle" class="result-title"></h2>
+              </div>
+              <button id="resetBtn" class="reset" type="button">重新选择</button>
+            </div>
+            <div class="tendency" aria-label="Offer 倾向对比">
+              <section id="offerAResult" class="offer-card a">
+                <div class="offer-top">
+                  <span class="offer-label">A</span>
+                  <span class="offer-name">Offer A</span>
+                </div>
+                <div id="offerAVotes" class="offer-votes">0</div>
+                <div id="offerACaption" class="offer-caption"></div>
+              </section>
+              <section id="offerBResult" class="offer-card b">
+                <div class="offer-top">
+                  <span class="offer-label">B</span>
+                  <span class="offer-name">Offer B</span>
+                </div>
+                <div id="offerBVotes" class="offer-votes">0</div>
+                <div id="offerBCaption" class="offer-caption"></div>
+              </section>
+            </div>
+            <div class="split" aria-label="倾向比例">
+              <div class="split-bar">
+                <div id="splitA" class="split-a"></div>
+                <div id="splitB" class="split-b"></div>
+              </div>
+              <div class="split-labels">
+                <span id="splitALabel">A 0%</span>
+                <span id="splitBLabel">B 0%</span>
+              </div>
+            </div>
+            <div id="review" class="review" aria-label="答题回顾"></div>
+          </div>
+          <p class="closing">选择之所以难，是因为两个选项都可能是对的。无论选哪一个，你都会经历高光和低谷，也都会有“如果当初选了另一个会怎样”的瞬间。把它走成对的路，比找到一个绝对正确的答案更重要。</p>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        theme: "具体日常",
+        text: "如果剥离公司名气、薪资这些外在标签，只看每天具体的工作内容，哪一份让你想象未来工作画面时身体微微前倾、有所期待？",
+        hint: "先别判断它看起来够不够体面，只看你是否愿意进入那样的一天。"
+      },
+      {
+        theme: "可忍受的痛苦",
+        text: "想象这两份工作里最难搞、最琐碎、最重复的部分。未来两年里，你更愿意每天忍受哪一个？",
+        hint: "我们常因光环爱上一份工作，又因具体日常离开。选工作，本质上也是选择更愿意承受哪一种痛苦。"
+      },
+      {
+        theme: "五年上限",
+        text: "如果抛开“选错了怎么办”的恐惧，单纯看两个机会的上限，哪一个更接近你理想中五年后想成为的样子？",
+        hint: "看长期方向，不看短期焦虑。"
+      },
+      {
+        theme: "生活掌控感",
+        text: "哪一份工作能让你拥有更多对生活的掌控感？",
+        hint: "包括下班后的自由时间、精力余额，以及你对生活本身的感知力。"
+      },
+      {
+        theme: "能力匹配",
+        text: "回顾过去最有成就感的一段经历，你是在独立解决复杂难题，还是协调多方资源推动事情？哪份工作更贴近你擅长的能力？",
+        hint: "用自己擅长的方式工作，通常会越做越有能量。"
+      },
+      {
+        theme: "容错空间",
+        text: "这两份工作，哪一份容错率更高，能允许你在状态不好的时候稍微喘息一下？",
+        hint: "容错率高的工作，常常能让人走得更远、更稳。"
+      },
+      {
+        theme: "可迁移能力",
+        text: "假如三年后行业遇冷，需要重新找工作，哪一份给你积累的可迁移能力更强？",
+        hint: "比如解决复杂问题的能力、行业人脉、项目经验、作品或方法论。"
+      },
+      {
+        theme: "制度保障",
+        text: "如果直属领导或核心同事让你感到不舒服，哪一边的平台制度能更好地保障你的基本权益和发展？",
+        hint: "不要只看人好不好，也看系统能不能托底。"
+      },
+      {
+        theme: "剥离期待",
+        text: "如果父母、朋友、伴侣都不知道这个选择，只有你自己知道，你会更偏向哪一个？",
+        hint: "剥离社交评价和外界期待后，剩下的往往更接近你自己的声音。"
+      },
+      {
+        theme: "硬币瞬间",
+        text: "最后，抛硬币吧。硬币抛起的那一瞬间，你心里有没有突然希望它落在某一面上？",
+        hint: "这不是让你靠硬币决定，而是捕捉潜意识里那个微小但真实的倾向。"
+      }
+    ];
+
+    const state = {
+      current: 0,
+      answers: Array(questions.length).fill(null)
+    };
+
+    const els = {
+      steps: document.querySelector("#steps"),
+      questionNumber: document.querySelector("#questionNumber"),
+      questionTheme: document.querySelector("#questionTheme"),
+      questionText: document.querySelector("#questionText"),
+      questionHint: document.querySelector("#questionHint"),
+      choiceA: document.querySelector("#choiceA"),
+      choiceB: document.querySelector("#choiceB"),
+      choiceATitle: document.querySelector("#choiceATitle"),
+      choiceBTitle: document.querySelector("#choiceBTitle"),
+      prevBtn: document.querySelector("#prevBtn"),
+      nextBtn: document.querySelector("#nextBtn"),
+      result: document.querySelector("#result"),
+      resultTitle: document.querySelector("#resultTitle"),
+      offerAResult: document.querySelector("#offerAResult"),
+      offerBResult: document.querySelector("#offerBResult"),
+      offerAVotes: document.querySelector("#offerAVotes"),
+      offerBVotes: document.querySelector("#offerBVotes"),
+      offerACaption: document.querySelector("#offerACaption"),
+      offerBCaption: document.querySelector("#offerBCaption"),
+      splitA: document.querySelector("#splitA"),
+      splitB: document.querySelector("#splitB"),
+      splitALabel: document.querySelector("#splitALabel"),
+      splitBLabel: document.querySelector("#splitBLabel"),
+      review: document.querySelector("#review"),
+      resetBtn: document.querySelector("#resetBtn")
+    };
+
+    function optionName(option) {
+      return option === "A" ? "Offer A" : "Offer B";
+    }
+
+    function counts() {
+      return {
+        A: state.answers.filter(answer => answer === "A").length,
+        B: state.answers.filter(answer => answer === "B").length,
+        done: state.answers.filter(Boolean).length
+      };
+    }
+
+    function renderSteps() {
+      els.steps.innerHTML = "";
+      questions.forEach((_, index) => {
+        const dot = document.createElement("span");
+        dot.className = "dot" + (state.answers[index] ? " done" : "");
+        els.steps.appendChild(dot);
+      });
+    }
+
+    function renderQuestion() {
+      const question = questions[state.current];
+      const selected = state.answers[state.current];
+      const score = counts();
+
+      els.questionNumber.textContent = `问题 ${state.current + 1}`;
+      els.questionTheme.textContent = question.theme;
+      els.questionText.textContent = question.text;
+      els.questionHint.textContent = question.hint;
+      els.choiceATitle.textContent = optionName("A");
+      els.choiceBTitle.textContent = optionName("B");
+      els.choiceA.classList.toggle("selected", selected === "A");
+      els.choiceB.classList.toggle("selected", selected === "B");
+      els.prevBtn.disabled = state.current === 0;
+      els.nextBtn.textContent = state.current === questions.length - 1 ? "查看结果" : "下一题";
+      els.nextBtn.disabled = !selected;
+
+      renderSteps();
+      if (score.done < questions.length) {
+        els.result.classList.remove("show");
+      }
+    }
+
+    function choose(option) {
+      state.answers[state.current] = option;
+      renderQuestion();
+    }
+
+    function showResult() {
+      const score = counts();
+      const winner = score.A === score.B ? null : score.A > score.B ? "A" : "B";
+      const gap = Math.abs(score.A - score.B);
+      const percentA = Math.round(score.A / questions.length * 100);
+      const percentB = 100 - percentA;
+
+      if (!winner) {
+        els.resultTitle.textContent = "A / B 倾向非常接近";
+      } else {
+        els.resultTitle.textContent = `当前更偏向 ${optionName(winner)}`;
+      }
+
+      els.offerAResult.classList.toggle("winner", winner === "A");
+      els.offerBResult.classList.toggle("winner", winner === "B");
+      els.offerAVotes.textContent = score.A;
+      els.offerBVotes.textContent = score.B;
+      els.offerACaption.textContent = `${percentA}% 的问题指向 A${winner === "A" ? `，领先 ${gap} 票` : ""}`;
+      els.offerBCaption.textContent = `${percentB}% 的问题指向 B${winner === "B" ? `，领先 ${gap} 票` : ""}`;
+      els.splitA.style.width = `${percentA}%`;
+      els.splitB.style.width = `${percentB}%`;
+      els.splitALabel.textContent = `A ${percentA}%`;
+      els.splitBLabel.textContent = `B ${percentB}%`;
+
+      els.review.innerHTML = "";
+      questions.forEach((_, index) => {
+        const answer = state.answers[index];
+        const dot = document.createElement("span");
+        dot.className = `review-dot ${answer.toLowerCase()}`;
+        dot.textContent = `${index + 1}${answer}`;
+        dot.title = `问题 ${index + 1}: ${answer}`;
+        els.review.appendChild(dot);
+      });
+
+      els.result.classList.add("show");
+      els.result.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function next() {
+      if (!state.answers[state.current]) return;
+      if (state.current === questions.length - 1) {
+        showResult();
+        return;
+      }
+      state.current += 1;
+      renderQuestion();
+    }
+
+    function prev() {
+      if (state.current === 0) return;
+      state.current -= 1;
+      renderQuestion();
+    }
+
+    function reset() {
+      state.current = 0;
+      state.answers = Array(questions.length).fill(null);
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    els.choiceA.addEventListener("click", () => choose("A"));
+    els.choiceB.addEventListener("click", () => choose("B"));
+    els.nextBtn.addEventListener("click", next);
+    els.prevBtn.addEventListener("click", prev);
+    els.resetBtn.addEventListener("click", reset);
+
+    renderQuestion();
+  </script>
+</body>
+</html>
